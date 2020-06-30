@@ -6,12 +6,15 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.training.ykb.spring.validation.MyValidation;
+
 @XmlRootElement
 public class Person {
 
     @Size(min = 2, max = 100)
     @NotEmpty
     private String name;
+    @MyValidation(start = "test", message = "surname test ile başlamalı.")
     private String surname;
     @NotEmpty
     private String birthdate;
