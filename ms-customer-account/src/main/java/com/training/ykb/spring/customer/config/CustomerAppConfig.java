@@ -41,7 +41,7 @@ public class CustomerAppConfig {
     // @Scope("prototype")
     @Qualifier("osman")
     public ICustomerDAO ranCustDAO() {
-        return new RandomCustomerDAO();
+        return new FileCustomerDAO();
     }
 
     @Bean

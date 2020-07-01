@@ -1,6 +1,7 @@
 package com.training.ykb.spring.order.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,12 +17,15 @@ public class OrderChargingRest {
     @Autowired
     private Payment payment;
 
+    @Value("${server.port}")
+    private int     port;
+
     @PostMapping("/pay")
     public String pay(@RequestBody final Order orderParam) {
         if (this.payment.pay(orderParam)) {
-            return "OK";
+            return "OK " + this.port;
         } else {
-            return "FAIL";
+            return "FAIL " + this.port;
         }
     }
 }
