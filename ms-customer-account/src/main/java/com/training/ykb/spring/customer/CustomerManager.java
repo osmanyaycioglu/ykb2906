@@ -1,5 +1,6 @@
 package com.training.ykb.spring.customer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,6 +37,15 @@ public class CustomerManager {
     // @Autowired
     public void xyz(final ICustomerDAO customerDoa) {
 
+    }
+
+    public Customer getCustomer(final long customerIdParam) {
+        return this.customerMap.get(customerIdParam);
+
+    }
+
+    public List<Customer> getAllCustomers() {
+        return new ArrayList<>(this.customerMap.values());
     }
 
 }

@@ -20,7 +20,7 @@ public class RandomCustomerDAO implements ICustomerDAO {
                                               .setCreditCard("" + randomLoc.nextLong()));
 
         }
-        return null;
+        return customerListLoc;
     }
 
 }

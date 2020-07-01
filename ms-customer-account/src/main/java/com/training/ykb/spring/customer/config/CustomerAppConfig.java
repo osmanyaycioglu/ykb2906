@@ -4,13 +4,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 import com.training.ykb.spring.customer.CustomerManager;
 import com.training.ykb.spring.customer.dao.FileCustomerDAO;
 import com.training.ykb.spring.customer.dao.ICustomerDAO;
 import com.training.ykb.spring.customer.dao.RandomCustomerDAO;
 
+import x.y.z.MyConfig;
+
 @Configuration
+@Import(MyConfig.class)
 public class CustomerAppConfig {
 
 
