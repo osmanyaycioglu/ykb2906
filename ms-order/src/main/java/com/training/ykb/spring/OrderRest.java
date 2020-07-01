@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +38,9 @@ public class OrderRest {
 
     @Autowired
     private IOrderRest          ior;
+
+    @Autowired
+    private IKitchenClient      kc;
 
     @PostMapping("/fullfill")
     public String fullfillOrder(@RequestBody final Order orderParam) {
@@ -91,15 +96,38 @@ public class OrderRest {
     }
 
     @PostMapping("/fullfill4")
-    public String fullfillOrder4(@RequestBody final Order orderParam) {
+    public ResponseEntity<String> fullfillOrder4(@RequestBody final Order orderParam) {
         String payLoc = this.ior.pay(orderParam);
         if (OrderRest.logger.isInfoEnabled()) {
             OrderRest.logger.info("[OrderRest][fullfillOrder4]-> Response : " + payLoc);
         }
-        if ((payLoc != null) && payLoc.startsWith("OK")) {
-            return "Siparişiniz alındı.En kısa zamanda gönderilecekltir";
+        if ((payLoc == null) || !payLoc.startsWith("OK")) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+                                 .body("Ödeme başarısız.");
         }
-        return "Ödemede problem oluştu";
+        try {
+            KitchenResponse startCookLoc = this.kc.startCook(orderParam);
+            if (startCookLoc.getSuccess()) {
+                return ResponseEntity.status(HttpStatus.OK)
+                                     .body("Siparişiniz alındı."
+                                           + startCookLoc.getNote()
+                                           + "."
+                                           + startCookLoc.getFinishTimeInMinutes()
+                                           + " dakika içinde siparişiniz kapınızda.");
+            } else {
+                return ResponseEntity.status(HttpStatus.BANDWIDTH_LIMIT_EXCEEDED)
+                                     .body("Şu anda mutfağımız dolu");
+            }
+        } catch (MyValidationException eLoc) {
+            OrderRest.logger.error("[OrderRest][fullfillOrder4]-> *Error*------************ : "
+                                   + eLoc.getError()
+                                   + " path : "
+                                   + eLoc.getPath()
+                                   + " message : "
+                                   + eLoc.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                 .body("Girdiler yanlış");
+        }
     }
 
 }
