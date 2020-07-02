@@ -7,9 +7,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +25,7 @@ import com.netflix.discovery.shared.Application;
 
 @RestController
 @RequestMapping("/order")
+@RefreshScope
 public class OrderRest {
 
     private static final Logger logger = LoggerFactory.getLogger(OrderRest.class);
@@ -45,6 +49,14 @@ public class OrderRest {
 
     @Autowired
     private RabbitTemplate      rabbitt;
+
+    @Value("${abc.xyz}")
+    private String              abcXyz;
+
+    @GetMapping("/refreshtest")
+    public String strTest() {
+        return this.abcXyz;
+    }
 
     @PostMapping("/fullfill")
     public String fullfillOrder(@RequestBody final Order orderParam) {
