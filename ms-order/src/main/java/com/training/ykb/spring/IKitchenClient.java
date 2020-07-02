@@ -2,6 +2,7 @@ package com.training.ykb.spring;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @FeignClient(name = "kitchen")
@@ -9,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface IKitchenClient {
 
     @PostMapping("/start/cooking")
-    public KitchenResponse startCook(final Order orderParam) throws MyValidationException;
+    public KitchenResponse startCook(@RequestBody final Order orderParam) throws MyValidationException;
 
 }

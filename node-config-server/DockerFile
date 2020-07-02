@@ -1,5 +1,0 @@
-FROM openjdk:8-jdk-alpine
-VOLUME /tmp
-ADD target/node-config-server-1.0.0.jar node-config-server-1.0.0.jar
-ENV JAVA_OPTS="-DPORT1=10000"
-ENTRYPOINT [ "sh","-c","java $JAVA_OPTS -jar node-config-server-1.0.0.jar" ]
