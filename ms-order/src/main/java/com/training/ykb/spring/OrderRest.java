@@ -1,6 +1,7 @@
 package com.training.ykb.spring;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,40 +23,61 @@ import org.springframework.web.client.RestTemplate;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.shared.Application;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 
 @RestController
 @RequestMapping("/order")
 @RefreshScope
 public class OrderRest {
 
-    private static final Logger logger = LoggerFactory.getLogger(OrderRest.class);
+    private static final Logger  logger = LoggerFactory.getLogger(OrderRest.class);
 
     @Autowired
     @LoadBalanced
-    private RestTemplate        rt;
+    private RestTemplate         rt;
 
     @Autowired
-    private EurekaClient        ec;
+    private EurekaClient         ec;
 
     @Autowired
     @Qualifier("direct")
-    private RestTemplate        rtDirect;
+    private RestTemplate         rtDirect;
 
     @Autowired
-    private IOrderRest          ior;
+    private IOrderRest           ior;
 
     @Autowired
-    private IKitchenClient      kc;
+    private IKitchenClient       kc;
 
     @Autowired
-    private RabbitTemplate      rabbitt;
+    private RabbitTemplate       rabbitt;
 
     @Value("${abc.xyz}")
-    private String              abcXyz;
+    private String               abcXyz;
 
+    private static AtomicInteger count  = new AtomicInteger();
+
+    @HystrixCommand(fallbackMethod = "fallback_strTest",
+                    commandProperties = @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds",
+                                                         value = "500"))
     @GetMapping("/refreshtest")
     public String strTest() {
+        int incrementAndGetLoc = OrderRest.count.incrementAndGet();
+        if ((incrementAndGetLoc % 3) == 0) {
+            throw new IllegalStateException();
+        }
+        if ((incrementAndGetLoc % 5) == 0) {
+            try {
+                Thread.sleep(1_000);
+            } catch (Exception eLoc) {
+            }
+        }
         return this.abcXyz;
+    }
+
+    public String fallback_strTest() {
+        return "fall back method  : " + this.abcXyz;
     }
 
     @PostMapping("/fullfill")

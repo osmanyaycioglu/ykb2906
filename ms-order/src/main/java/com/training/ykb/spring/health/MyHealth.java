@@ -15,7 +15,7 @@ public class MyHealth implements HealthIndicator {
         orderLoc.setAmount(100);
         orderLoc.setContent(null);
         orderLoc.setCustomerId(10101);
-        return Health.down()
+        return Health.up()
                      .withDetail("info",
                                  orderLoc)
                      .build();
