@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -41,6 +42,9 @@ public class OrderRest {
 
     @Autowired
     private IKitchenClient      kc;
+
+    @Autowired
+    private RabbitTemplate      rabbitt;
 
     @PostMapping("/fullfill")
     public String fullfillOrder(@RequestBody final Order orderParam) {
@@ -108,6 +112,9 @@ public class OrderRest {
         try {
             KitchenResponse startCookLoc = this.kc.startCook(orderParam);
             if (startCookLoc.getSuccess()) {
+                this.rabbitt.convertAndSend("not_direct_exc",
+                                            "notification_key",
+                                            orderParam);
                 return ResponseEntity.status(HttpStatus.OK)
                                      .body("Siparişiniz alındı."
                                            + startCookLoc.getNote()
@@ -127,7 +134,14 @@ public class OrderRest {
                                    + eLoc.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                                  .body("Girdiler yanlış");
+        } catch (Exception eLoc) {
+            OrderRest.logger.error("[OrderRest][fullfillOrder4]-> *Error* : " + eLoc.getMessage(),
+                                   eLoc);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body("Problem");
+
         }
+
     }
 
 }
